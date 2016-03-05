@@ -1,0 +1,32 @@
+﻿#yourimage
+{
+    width:200px;
+    height: 100px;
+}
+#swatches {
+		width: 200px;
+		height: 100px;	
+	}
+.swatch {
+		width:200px;
+		height: 200px;
+		border-style:solid;
+		border-width:thin;	
+		margin-right: 3px;	
+	}
+.upImg
+{
+    width: 200px;
+    height: 100px;
+}
+
+#sendButton{
+    width: 200px;
+    height: 100px;
+}
+
+#detailsPhoto{
+    float: left;
+    box-sizing: border-box;
+}
+

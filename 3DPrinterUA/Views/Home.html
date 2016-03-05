@@ -1,0 +1,101 @@
+<html>
+<head>
+    <link href="../Content/StyleSheet.css" rel="stylesheet" type="text/css" />
+    <link href="../Content/bootstrap-3.3.6-dist/css/bootstrap.css" rel="stylesheet" type="text/css" />
+    <script src="../Content/jquery-2.2.1.js" type="text/javascript"></script>
+</head>
+<body>
+    <input  type="file" capture="camera" accept="image/*" id="pictureField"/>
+    <img id ="yourimage"/>
+    <form id="detailsPhoto">
+        <div id="swatchers">
+            <div id="swatch0" class="swatch"></div>
+            <div id="swatch1" class="swatch"></div>
+            <div id="swatch2" class="swatch"></div>
+            <div id="swatch3" class="swatch"></div>
+            <div id="swatch4" class="swatch"></div>
+
+            <button type="submit" id="sendButton" title="Upload Images" onclick="sendFiles()">Upload Images</button>
+        </div>
+    </form>
+    <form id="loginForm" class="modal-dialog">
+        <input id="loginName"/>
+        <input type="password" id="loginPassword" />
+        <button type="submit">LogIn</button>
+    </form>
+    <script type="text/javascript">
+        var desiredWidth;
+        var isSwatched = [];
+        var imageFiles = [];
+        for (var i = 0; i < 5; i++) {
+            isSwatched[i] = false;
+            imageFiles[i] = null;
+        }
+        $(document).ready(function () {
+            console.log('ready');
+            
+            $("#pictureField").on("change", gotPic);
+            $("#yourimage").load(getSwatches);
+            desiredWidth = window.innerWidth;
+
+            if (!("url" in window) && ("webkitURL" in window)) {
+                window.URL = window.webkitURL;
+            }
+        });
+        function getSwatches() 
+        {
+            
+            for (var i = 0; i < 5; i++) {
+                if (!isSwatched[i]) {
+                    $("#swatch" + i).prepend($('<img>', { id: 'swatchImg' + i, src: $('#yourimage').attr('src'), class: 'upImg' }));
+                    isSwatched[i] = true;
+
+                    break;
+                }
+            }   
+        }
+        function gotPic(evt) {
+            if (evt.target.files.length == 1 && evt.target.files[0].type.indexOf("image/") ==0) {
+                $("#yourimage").attr("src", URL.createObjectURL(evt.target.files[0]));
+                for(var i=0;i<5;i++){
+                    if (!isSwatched[i]) {
+                        
+                        imageFiles[i] = evt.target.files[0];
+                        if (imageFiles[i] != undefined) {
+                            console.log(imageFiles[i]);
+                        }
+                        break;
+                    }
+                }
+                console.log('gotPic')
+            }
+        }
+        function sendFiles() {
+            var fd = new FormData();
+            for (var i = 0; i < 5; i++) {
+                fd.append('swatch'+i, imageFiles[i]);
+                
+            }
+            
+            $.ajax({
+                type: 'post',
+                url: 'Home/UploadImage',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert(response)
+                },
+                error: function(er){
+                    alert(er);
+                            }
+            });
+        }
+        function  testClick()
+        {
+            alert('target button was clicked');
+        }
+    </script>
+</body>
+</html>
+
