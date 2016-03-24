@@ -14,6 +14,10 @@ namespace _3DPrinterUA.Controllers
 
             return View();
         }
+        public ActionResult Admin()
+        {
 
+            return View();
+        }
     }
 }

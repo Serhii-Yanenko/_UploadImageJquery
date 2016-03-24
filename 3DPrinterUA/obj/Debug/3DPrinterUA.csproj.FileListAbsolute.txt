@@ -59,3 +59,4 @@ D:\OS\3DPrinterUA\3DPrinterUA\bin\System.Web.WebPages.Razor.xml
 D:\OS\3DPrinterUA\3DPrinterUA\obj\Debug\3DPrinterUA.csprojResolveAssemblyReference.cache
 D:\OS\3DPrinterUA\3DPrinterUA\obj\Debug\3DPrinterUA.dll
 D:\OS\3DPrinterUA\3DPrinterUA\obj\Debug\3DPrinterUA.pdb
+D:\OS\3DPrinterUA\3DPrinterUA\bin\MySql.Data.dll

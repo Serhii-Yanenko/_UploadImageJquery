@@ -5,7 +5,7 @@
     <script src="../Content/jquery-2.2.1.js" type="text/javascript"></script>
 </head>
 <body>
-    <input  type="file" capture="camera" accept="image/*" id="pictureField"/>
+    <input  type="file" capture="camera" accept="image/*" id="pictureField" class="btn-danger"/>
     <img id ="yourimage"/>
     <form id="detailsPhoto">
         <div id="swatchers">
@@ -18,7 +18,7 @@
             <button type="submit" id="sendButton" title="Upload Images" onclick="sendFiles()">Upload Images</button>
         </div>
     </form>
-    <form id="loginForm" class="modal-dialog">
+    <form id="loginForm" class="modal-dialog alert-dismissible">
         <input id="loginName"/>
         <input type="password" id="loginPassword" />
         <button type="submit">LogIn</button>
