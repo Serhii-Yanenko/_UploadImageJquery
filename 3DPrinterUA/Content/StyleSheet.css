@@ -30,3 +30,6 @@
     box-sizing: border-box;
 }
 
+.detailsPhoto{
+    display: flex;
+}

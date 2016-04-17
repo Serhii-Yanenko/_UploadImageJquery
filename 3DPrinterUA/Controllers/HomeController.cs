@@ -6,76 +6,104 @@ using System.Web.Mvc;
 using _3DPrinterUA.DALPrinterUA;
 using MySql.Data;
 using MySql.Data.MySqlClient;
-
+using System.IO;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Collections;
 namespace _3DPrinterUA.Controllers
 {
     public class HomeController : Controller
     {
-     
+
         public ActionResult Index()
         {
             return new FilePathResult("~/Views/Home.html", "text/html");
         }
         [HttpPost]
-        public ActionResult UploadImage()
+        public JsonResult UploadImage()
         {
-           
-                var pic0 = System.Web.HttpContext.Current.Request.Files["swatch0"];
-                var pic1 = System.Web.HttpContext.Current.Request.Files["swatch1"];
-                var pic2 = System.Web.HttpContext.Current.Request.Files["swatch2"];
-                var pic3 = System.Web.HttpContext.Current.Request.Files["swatch3"];
-                var pic4 = System.Web.HttpContext.Current.Request.Files["swatch4"];
-                var connDb = ConnectionClass.Instance();
-            System.IO.BufferedStream image0 = new System.IO.BufferedStream(pic0.InputStream);
-            byte[] buffer0 = new byte[image0.Length];
-            image0.Read(buffer0, 0, buffer0.Length);
-            System.IO.BufferedStream image1 = new System.IO.BufferedStream(pic1.InputStream);
-            byte[] buffer1 = new byte[image1.Length];
-            image1.Read(buffer1, 0, buffer1.Length);
 
-            System.IO.BufferedStream image2 = new System.IO.BufferedStream(pic2.InputStream);
-            byte[] buffer2 = new byte[image2.Length];
-            image2.Read(buffer2, 0, buffer2.Length);
+            HttpPostedFile pic0 = System.Web.HttpContext.Current.Request.Files["swatch0"];
+            HttpPostedFile pic1 = System.Web.HttpContext.Current.Request.Files["swatch1"];
+            HttpPostedFile pic2 = System.Web.HttpContext.Current.Request.Files["swatch2"];
+            HttpPostedFile pic3 = System.Web.HttpContext.Current.Request.Files["swatch3"];
+            HttpPostedFile pic4 = System.Web.HttpContext.Current.Request.Files["swatch4"];
+            ArrayList listOfPics = new ArrayList();
+            listOfPics.Add(pic0);
+            listOfPics.Add(pic1);
+            listOfPics.Add(pic2);
+            listOfPics.Add(pic3);
+            listOfPics.Add(pic4);
 
-            System.IO.BufferedStream image3 = new System.IO.BufferedStream(pic3.InputStream);
-            byte[] buffer3 = new byte[image3.Length];
-            image3.Read(buffer3, 0, buffer3.Length);
-
-            System.IO.BufferedStream image4 = new System.IO.BufferedStream(pic4.InputStream);
-            byte[] buffer4 = new byte[image4.Length];
-            image4.Read(buffer4, 0, buffer4.Length);
-            connDb.DataBaseName = "3dprinterua";
-            if (connDb.IsConnect())
+            ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
+            var ep = new EncoderParameters(1);
+            ep.Param[0] = new EncoderParameter(Encoder.Quality, 200L);
+            string path = @"D:\Books\Work\TheeDPrinter\_UploadImageJquery\3DPrinterUA\images\";
+            DirectoryInfo di;
+            string fname = HomeController.GetUnicalFolderName();
+            string explPAth = path + fname;
+            di = System.IO.Directory.CreateDirectory(explPAth);
+            string[] locations = new string[5];
+            
+            long ordersID=-1;
+            try
             {
+                foreach (HttpPostedFile pic in listOfPics)
+                {
+                    if (pic.ContentLength > 0)
+                    {
+                        string FileName = pic.FileName;
+                        byte[] input = new byte[pic.ContentLength];
+                        Stream stream = pic.InputStream;
+                        stream.Read(input, 0, pic.ContentLength);
+                        Image image = Image.FromStream(pic.InputStream);
 
-                string query = "Insert into orderprint(image1, image2 ,image3, image4, image5, isVerified)"+
-                    " Values(@image1, @image2, @image3, @image4, @image5, @isVerified)";
-                MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = connDb.Connection;
-                cmd.CommandText = query;
-                cmd.Parameters.Add("@image1", MySqlDbType.LongBlob);
-                cmd.Parameters.Add("@image2", MySqlDbType.LongBlob);
-                cmd.Parameters.Add("@image3", MySqlDbType.LongBlob);
-                cmd.Parameters.Add("@image4", MySqlDbType.LongBlob);
-                cmd.Parameters.Add("@image5", MySqlDbType.LongBlob);
-                cmd.Parameters.Add("@isVerified", MySqlDbType.Bit);
-                cmd.Parameters["@image1"].Value = image0;
-                cmd.Parameters["@image2"].Value = image1;
-                cmd.Parameters["@image3"].Value = image2;
-                cmd.Parameters["@image4"].Value = image3;
-                cmd.Parameters["@image5"].Value = image4;
-                cmd.Parameters["@isVerified"].Value = false;
+                        locations[listOfPics.IndexOf(pic)] = explPAth + @"\" + FileName;
+                        image.Save(locations[listOfPics.IndexOf(pic)], jpgEncoder, ep);
 
+                    }
+                }
+                ConnectDB conn = new ConnectDB();
+                ordersID = conn.InsertImage(locations[0], locations[1], locations[2], locations[3], locations[4]);
                 
 
 
-                 
-
-                cmd.ExecuteNonQuery();
             }
-            connDb.Close();
-
-            return RedirectToAction("Home", "Index");
+            catch (NullReferenceException ex)
+            {
+                return Json(ordersID, JsonRequestBehavior.AllowGet);
+            }
+            
+            return Json(new { Id=ordersID }, JsonRequestBehavior.AllowGet);
         }
+        private ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
+        }
+        [HttpPost]
+        public JsonResult VerifyOrder()
+        {
+            ConnectDB conn = new ConnectDB();
+            var req = System.Web.HttpContext.Current.Request.Form["VerifID"];
+            long idToVerify = (long)Convert.ToInt32(req);
+            conn.VerifyOrder(idToVerify);
+            return Json(new { result = "Your Order Was Succesfully Submited" });
+        }
+        private static string GetUnicalFolderName()
+        {
+            return DateTime.Now.ToString("yyyyMMddHHmmssfff") + "_" + Guid.NewGuid().ToString("N");
+        }
+
+        
     }
+
 }
+
