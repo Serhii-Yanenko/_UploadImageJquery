@@ -5,7 +5,10 @@
 }
 #swatches {
 		width: 200px;
-		height: 100px;	
+		height: 100px;
+        display: inline-block;
+       
+        overflow: scroll;	
 	}
 .swatch {
 		width:200px;
@@ -13,6 +16,9 @@
 		border-style:solid;
 		border-width:thin;	
 		margin-right: 3px;	
+        float: left;
+        margin: 3px 3px 3px 3px;
+        border-color: red;
 	}
 .upImg
 {
